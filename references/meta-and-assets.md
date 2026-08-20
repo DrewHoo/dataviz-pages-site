@@ -93,6 +93,16 @@ Same shape, output `public/og.png` at 1200×630, raster from a hand-coded SVG. A
 - A stylized representative visual on the right (a fake chart, a mini-grid, a sample of the data).
 - Footer with the URL and a thin accent bar.
 
+### Index-card cover (`public/card.png`, 1200×750)
+
+**Do not reuse `og.png` as the drewhoover.com project-card cover.** `ProjectCard.astro` renders covers as `aspect-ratio: 8/5; object-fit: cover`, so a 1200×630 image (1.90) gets centre-cropped — the header comes off the top and the last rows off the bottom, and nothing warns you. Emit a second variant at 1200×750 (exactly 8:5) that survives intact, and copy it over:
+
+```bash
+cp public/card.png ../DrewHoo.github.io/public/projects/<slug>.png
+```
+
+Parameterise `gen-og.mjs` by size rather than duplicating the SVG, and give the taller variant more rows since it has the room. Assert the layout fits — e.g. `if (lastRow + 18 > cardBottom) throw` — because a row running off the edge into the footer is easy to ship and only visible if you actually open the PNG. Open it.
+
 ### Wire up the scripts
 
 Add to `package.json`:
@@ -102,7 +112,7 @@ Add to `package.json`:
 "gen:favicon": "node scripts/gen-favicon.mjs"
 ```
 
-Run them once, commit the outputs (`public/favicon*.png`, `public/favicon.svg`, `public/apple-touch-icon.png`, `public/og.png`). Re-run after any rebrand.
+Run them once, commit the outputs (`public/favicon*.png`, `public/favicon.svg`, `public/apple-touch-icon.png`, `public/og.png`, `public/card.png`). Re-run after any rebrand — and remember the OG image often depicts the page's main visual, so a redesign that removes that visual leaves the card advertising a section that no longer exists.
 
 ### OG cache busting after a redesign
 

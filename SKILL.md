@@ -1,6 +1,6 @@
 ---
 name: dataviz-pages-site
-description: Build, scaffold, or troubleshoot a sibling data-viz project that deploys to GitHub Pages under drewhoover.com/<repo-slug>/. Covers the whole stack — repo + Vite + base-path config, Actions-based deploy and scheduled data refreshes, build-time data fetching, shareable URL state, mobile-first responsive design, OG/Twitter meta tags + favicon + preview image generation, lazy-loaded Mixpanel analytics, common date-handling traps, and registering the project on the drewhoover.com index. Use when the user says "new dataviz project", "set up a new site under drewhoover.com", "make a dataviz site", "why isn't my project serving", "make this site shareable", "add OG image to a dataviz site", "add analytics to a dataviz site", "fix mobile UX on a dataviz site", or mentions the space-rock / cfb-all-time-records / buy-it-now-or-never pattern.
+description: Build, scaffold, or troubleshoot a sibling data-viz project that deploys to GitHub Pages under drewhoover.com/<repo-slug>/. Covers the whole stack — repo + Vite + base-path config, Actions-based deploy and scheduled data refreshes, build-time data fetching, agent-researched datasets with per-row citations, shareable URL state, mobile-first responsive design, SEO (prerendering the SPA so crawlers see content, headings, titles, JSON-LD, sitemap and robots), OG/Twitter meta tags + favicon + index-card image generation, Mixpanel analytics via the shared drewhoover.com embed, common date-handling traps, and registering or refreshing the project card on the drewhoover.com index. Use when the user says "new dataviz project", "set up a new site under drewhoover.com", "make a dataviz site", "why isn't my project serving", "make this site shareable", "add OG image to a dataviz site", "add analytics to a dataviz site", "I'm not getting any analytics/Mixpanel events", "fix SEO on a dataviz site", "my project isn't showing up in search", "update the project card on drewhoover.com", "fix mobile UX on a dataviz site", says the data "does not exist anywhere" or has to be researched/assembled from documents, or mentions the space-rock / cfb-all-time-records / buy-it-now-or-never / how-many-rings pattern.
 ---
 
 # Building a GitHub Pages data-viz project site under drewhoover.com
@@ -11,6 +11,7 @@ Canonical examples in the wild:
 - `DrewHoo/space-rock` → https://drewhoover.com/space-rock/ (Vite + React + DuckDB-WASM)
 - `DrewHoo/cfb-all-time-records` → https://drewhoover.com/cfb-all-time-records/ (Vite + React, multi-page)
 - `DrewHoo/buy-it-now-or-never` → https://drewhoover.com/buy-it-now-or-never/ (Vite + React + D3, scheduled Yahoo fetch, URL-state, Mixpanel — the most complete reference)
+- `~/Projects/how-many-rings` (local) — the reference for a **researched** dataset: no source file existed, so an agent fleet assembled ~1,300 cited rows from media guides and archived staff directories. See `references/researched-datasets.md`.
 
 When in doubt about a craft-level concern (analytics, OG image, URL state, mobile, etc.), copy the pattern from `buy-it-now-or-never`.
 
@@ -28,9 +29,11 @@ Each file under `references/` covers one concern in depth. Read the ones relevan
 - **`references/meta-and-assets.md`** — Read when polishing a site for sharing. Full `<head>` template (title, description, OG, Twitter, favicons, drewhoover.com chrome) plus `sharp`-based favicon and OG image generation scripts.
 - **`references/index-registration.md`** — Read when a site is live and needs a project card on `drewhoover.com`. Touches a different repo (`DrewHoo.github.io`).
 - **`references/build-time-data.md`** — Read when the site has time-varying JSON content (prices, sports stats, scraped data). Covers the fetch-and-bake-at-build-time pattern, bounded concurrency, scheduled refresh cron tuning, and why `public/data/` is gitignored.
+- **`references/researched-datasets.md`** — Read when the data does **not** exist as a file or API anywhere and has to be assembled by an agent fleet from documents. Covers inverting the question so a deterministic join does the counting, per-row verbatim citations as a hallucination gate, encoding judgment as versioned rule files, the coverage report that catches the failure modes a finished page hides, and how to prompt sweeps so they reject as well as confirm.
 - **`references/url-state.md`** — Read when adding shareable views. URL ↔ state mirroring with `replaceState`, validation against loaded data, user-action vs URL-load preservation, and the paired "Share this chart" button.
 - **`references/mobile-and-dates.md`** — Read when interactions break on touch devices or dates display one day off for US viewers. Covers `pointer*` events, `touch-action: pan-y`, responsive table hiding, and the UTC midnight pitfall (`scaleUtc` + `utcFormat`).
-- **`references/analytics.md`** — Read when adding Mixpanel. Lazy-loaded chunk, shared public token, auto-pageviews on `replaceState`, structured events, adblock-safe fallback.
+- **`references/analytics.md`** — Read when adding Mixpanel, **or when a site is reporting nothing**. Project sites do not inherit the index site's analytics; several shipped without any and reported zero for months. Covers the shared `/embed/analytics.js` drop-in, the per-repo alternative, and how to verify delivery instead of assuming it.
+- **`references/seo.md`** — Read before announcing a site, or when it isn't showing up in search. Prerendering the SPA (the big one — without it the deployed HTML contains no content at all), a real `<h1>`, titles aimed at winnable queries, JSON-LD, canonical, sitemap and robots.
 
 ## Scaffold workflow (high-level)
 
@@ -42,11 +45,12 @@ For a brand-new site, walk these steps in order. Each step is a one-liner here; 
 4. Add `.github/workflows/deploy.yml` (Actions → Pages). If using `lightningcss` / `sharp` / Tailwind v4, add the Linux binary fix between `npm ci` and `npm run build`.
 5. Enable Pages: `gh api -X POST repos/DrewHoo/<slug>/pages -f build_type=workflow` (fall back to `PUT` if it already exists).
 6. Fill out `index.html` from the template in `references/meta-and-assets.md` (drewhoover.com back-bar + giscus chrome go in `<head>`).
-7. Generate favicon set + OG image via `sharp` scripts. See `references/meta-and-assets.md`.
-8. Register the project on the drewhoover.com index. See `references/index-registration.md`.
-9. `git push origin main && gh run watch --repo DrewHoo/<slug>`, then `curl -sI https://drewhoover.com/<slug>/` to confirm 200.
+7. Generate favicon set + OG image via `sharp` scripts, plus the 8:5 index-card cover. See `references/meta-and-assets.md`.
+8. Add the prerender build step so the deployed HTML actually contains the page. See `references/seo.md`.
+9. Register the project on the drewhoover.com index. See `references/index-registration.md`.
+10. `git push origin main && gh run watch --repo DrewHoo/<slug>`, then `curl -sI https://drewhoover.com/<slug>/` to confirm 200.
 
-Add the opt-in subsystems (build-time data, URL state, mobile interactions, analytics) as the project's needs justify — see the matching reference file.
+Add the opt-in subsystems (build-time data, URL state, mobile interactions, analytics) as the project's needs justify — see the matching reference file. Analytics is close to non-optional: it is one script tag, and skipping it is why several shipped sites have no data at all.
 
 ## Style baseline
 
@@ -78,22 +82,41 @@ main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
 
 Card-style sections (white background, 1px border, 8px radius, light shadow) read well against the off-white page background and don't compete with the data. Use real semantic colors (red for danger, green for success, etc.) for data elements, not for chrome.
 
+## When the data has to be researched
+
+If the dataset does not exist as a file, an API, or a scrapable table — if the
+answer is scattered across documents and has to be assembled — read
+`references/researched-datasets.md` before starting. The short version: invert
+the question so a small fixed list joins against researched rows, make every row
+carry the verbatim line that proves it, keep judgment in versioned rule files
+rather than in agent heads, and ship a coverage report, because a page with a
+third of its rows missing looks exactly as confident as a complete one.
+
 ## Pre-launch checklist
 
 Before sharing the URL anywhere:
 
 - [ ] Site loads at `https://drewhoover.com/<slug>/` (200, not 404)
 - [ ] No console errors on load
+- [ ] **Content is in the HTML, not just in JS**: `curl -s <url> | grep -c '<div id="root"></div>'` returns `0`. A `1` means crawlers see an empty page — see `references/seo.md`
+- [ ] Exactly one `<h1>`, and it names the subject rather than a section
+- [ ] `<title>` targets a query this page can plausibly win, not the head term owned by Wikipedia
+- [ ] `<link rel="canonical">` present
+- [ ] Analytics actually delivering — `Object.keys(localStorage).filter(k => k.startsWith('mp_'))` is non-empty and a `track()` produces a request to `api-js.mixpanel.com` (wait ~6s; it batches). See `references/analytics.md`
 - [ ] Mobile: hover-style interactions work on touch (scrub with a finger, not just a mouse) — see `references/mobile-and-dates.md`
 - [ ] Mobile: page is readable without horizontal scroll
 - [ ] Selecting a different item / filter updates the URL (look at the address bar) — see `references/url-state.md`
 - [ ] Reloading the URL with state lands you in the same view
-- [ ] Share button copies the current URL and shows feedback
+- [ ] If the page has a share button: it copies the current URL and shows feedback (a mostly-static page can reasonably skip the button and still keep the URL state)
 - [ ] Pasting the site URL into a chat/social platform shows the OG card with the right image, title, and description (use Facebook Sharing Debugger / Twitter Card Validator before announcing) — see `references/meta-and-assets.md`
 - [ ] Favicon is visible in the tab strip (hard refresh if stale)
 - [ ] Back-bar appears at the top of the page
 - [ ] Comments section renders at the bottom (giscus widget loads)
 - [ ] Project card is registered on drewhoover.com index and links work — see `references/index-registration.md`
+- [ ] Card cover is 1200×750, and **open the PNG** — the card crops 8:5, so a 1200×630 OG image loses its top and bottom silently
+- [ ] Card blurb describes the site as it is now, not as it was before the last redesign
+- [ ] If the data was researched rather than downloaded: coverage report is clean, every displayed claim links to a source, and any weaker-evidence rows are labeled as such — see `references/researched-datasets.md`
+- [ ] If the page shows photos of people: no image is a site logo or the wrong person (check aspect ratios; landscape "headshots" are usually an `og:image` fallback)
 
 ## Troubleshooting
 
@@ -117,6 +140,12 @@ Then re-run the workflow.
 
 ### OG image cached at old version after redesign
 Reddit / X / Bluesky / LinkedIn cache OG fetches for hours-days. Force a refresh via the platform's card validator (Facebook Sharing Debugger, Twitter Card Validator) before announcing, or share with a cache-busting query param the first time. See `references/meta-and-assets.md`.
+
+### A project site sends no Mixpanel events
+It almost certainly never had analytics. Project sites are separate Pages deployments and inherit nothing from the index site; `grep -c "embed/analytics.js" index.html` returning `0` is the answer. See `references/analytics.md`.
+
+### The site isn't in Google at all
+Check `curl -s <url> | grep -c '<div id="root"></div>'`. If it returns `1`, the deployed HTML has no content and there is nothing to index. See `references/seo.md`.
 
 ### Hover works on desktop but does nothing on phone
 You're using `onMouseMove` / `onMouseDown`. Switch to `onPointer*` and branch on `pointerType` — see `references/mobile-and-dates.md`.
