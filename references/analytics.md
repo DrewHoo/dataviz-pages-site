@@ -4,19 +4,19 @@ Read this when a project site should report pageviews and structured events, or 
 
 ## The one thing to know first
 
-**Each project site is its own GitHub Pages deployment. None of them inherit the index site's analytics.** `drewhoover.com/<slug>/` shares an origin with the index site, but not a bundle — so a project reports events only if that repo did something about it. In Aug 2026, five published projects (`and-juliet`, `space-rock`, `collegiate-championships`, `should-you-buy-an-all-time-high`, `cfb-all-time-records`) had never been wired up and had reported nothing since launch. Nothing in the UI hints at this; the site just looks fine and no data arrives.
+**Each project site is its own GitHub Pages deployment. None of them inherit the index site's analytics.** `<domain>/<slug>/` shares an origin with the index site, but not a bundle — so a project reports events only if that repo did something about it. In Aug 2026, five published projects (`and-juliet`, `space-rock`, `collegiate-championships`, `should-you-buy-an-all-time-high`, `cfb-all-time-records`) had never been wired up and had reported nothing since launch. Nothing in the UI hints at this; the site just looks fine and no data arrives.
 
 If a site is missing from Mixpanel, check this before debugging anything clever.
 
 ## Preferred: the shared embed (no dependency)
 
-`DrewHoo.github.io/public/embed/analytics.js` is a drop-in, matching the `back-bar.js` / `giscus.js` convention. One tag in the project's `index.html`:
+`<owner>.github.io/public/embed/analytics.js` is a drop-in, matching the `back-bar.js` / `giscus.js` convention. One tag in the project's `index.html`:
 
 ```html
-<!-- drewhoover.com cross-site chrome -->
-<script src="https://drewhoover.com/embed/back-bar.js" async></script>
-<script src="https://drewhoover.com/embed/giscus.js" async></script>
-<script src="https://drewhoover.com/embed/analytics.js" async></script>
+<!-- <domain> cross-site chrome -->
+<script src="https://<domain>/embed/back-bar.js" async></script>
+<script src="https://<domain>/embed/giscus.js" async></script>
+<script src="https://<domain>/embed/analytics.js" async></script>
 ```
 
 That's the whole integration. No `mixpanel-browser` dependency in the project repo, one place to fix bugs, and new projects get it by copying the chrome block they were already copying.
@@ -24,7 +24,7 @@ That's the whole integration. No `mixpanel-browser` dependency in the project re
 What it does:
 - Auto-pageview on load **and** on every history change, so `replaceState` URL state (see `references/url-state.md`) counts each view.
 - Registers a `site` super-property (first path segment, `index` at the root) so reports split project sites apart without pathname parsing.
-- Same origin as drewhoover.com, so `distinct_id` carries over — a visit that starts on the homepage and continues into a project reads as one person.
+- Same origin as the index site, so `distinct_id` carries over — a visit that starts on the homepage and continues into a project reads as one person.
 - Exposes `window.dhAnalytics.track(name, props)`, queued until init, dropped silently if blocked.
 - Opt out with `data-dhv-analytics="off"` on `<html>` or `<body>`.
 
@@ -58,7 +58,7 @@ and sends nothing. Bundling also keeps the file same-origin, so no third-party C
 Still fine for a project that wants analytics in its own bundle — e.g. one that needs `track()` during module init, before an async embed could have loaded. `npm i mixpanel-browser`, then `src/analytics.js`:
 
 ```js
-const TOKEN = '1c6a0f45b8a5768185a8d9a2f4d65452'
+const TOKEN = '<your Mixpanel project token>' // same value as the index repo's embed
 
 let mp = null
 const queue = []
@@ -83,7 +83,7 @@ Import it for side effects in `main.jsx`. **Do not use both this and the embed o
 
 ## The token
 
-`1c6a0f45b8a5768185a8d9a2f4d65452` — shared across all the sites, public by design (write-only ingestion, no PII), safe to commit.
+One Mixpanel project per owner, shared across the index site and every project site. The token is in the index repo's `src/scripts/embed-analytics.js`; copy it from there if a project bundles its own module. It's public by design (write-only ingestion, no PII) and safe to commit. The `site` super-property splits the sites apart in reports.
 
 ## Verifying it actually works
 

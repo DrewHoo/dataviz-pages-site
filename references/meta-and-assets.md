@@ -1,6 +1,6 @@
 # Head template, favicons, and OG preview image
 
-Read this when polishing a site for public sharing: setting up the full `<head>` (title, description, OG, Twitter, favicons, drewhoover.com chrome) and generating the favicon set + OG preview image. This is the "make it look right when pasted into a chat" pass.
+Read this when polishing a site for public sharing: setting up the full `<head>` (title, description, OG, Twitter, favicons, index-site chrome) and generating the favicon set + OG preview image. This is the "make it look right when pasted into a chat" pass.
 
 ## The full `<head>` for a polished site
 
@@ -25,8 +25,8 @@ Read this when polishing a site for public sharing: setting up the full `<head>`
     <meta property="og:site_name" content="{Short site name}" />
     <meta property="og:title" content="{Same as <title> or richer}" />
     <meta property="og:description" content="{Engaging hook, ~200 chars}" />
-    <meta property="og:url" content="https://drewhoover.com/<slug>/" />
-    <meta property="og:image" content="https://drewhoover.com/<slug>/og.png" />
+    <meta property="og:url" content="https://<domain>/<slug>/" />
+    <meta property="og:image" content="https://<domain>/<slug>/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="{Describe the preview image for screen readers.}" />
@@ -35,11 +35,11 @@ Read this when polishing a site for public sharing: setting up the full `<head>`
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="{Same as og:title}" />
     <meta name="twitter:description" content="{Same as og:description}" />
-    <meta name="twitter:image" content="https://drewhoover.com/<slug>/og.png" />
+    <meta name="twitter:image" content="https://<domain>/<slug>/og.png" />
 
-    <!-- drewhoover.com cross-site chrome -->
-    <script src="https://drewhoover.com/embed/back-bar.js" async></script>
-    <script src="https://drewhoover.com/embed/giscus.js" async></script>
+    <!-- <domain> cross-site chrome -->
+    <script src="https://<domain>/embed/back-bar.js" async></script>
+    <script src="https://<domain>/embed/giscus.js" async></script>
   </head>
   <body>
     <div id="root"></div>
@@ -95,10 +95,10 @@ Same shape, output `public/og.png` at 1200×630, raster from a hand-coded SVG. A
 
 ### Index-card cover (`public/card.png`, 1200×750)
 
-**Do not reuse `og.png` as the drewhoover.com project-card cover.** `ProjectCard.astro` renders covers as `aspect-ratio: 8/5; object-fit: cover`, so a 1200×630 image (1.90) gets centre-cropped — the header comes off the top and the last rows off the bottom, and nothing warns you. Emit a second variant at 1200×750 (exactly 8:5) that survives intact, and copy it over:
+**Do not reuse `og.png` as the index-site project-card cover.** `ProjectCard.astro` renders covers as `aspect-ratio: 8/5; object-fit: cover`, so a 1200×630 image (1.90) gets centre-cropped — the header comes off the top and the last rows off the bottom, and nothing warns you. Emit a second variant at 1200×750 (exactly 8:5) that survives intact, and copy it over:
 
 ```bash
-cp public/card.png ../DrewHoo.github.io/public/projects/<slug>.png
+cp public/card.png <index_repo_path>/public/projects/<slug>.png
 ```
 
 Parameterise `gen-og.mjs` by size rather than duplicating the SVG, and give the taller variant more rows since it has the room. Assert the layout fits — e.g. `if (lastRow + 18 > cardBottom) throw` — because a row running off the edge into the footer is easy to ship and only visible if you actually open the PNG. Open it.

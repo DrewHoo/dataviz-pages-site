@@ -15,7 +15,7 @@ Every word — headings, table rows, the intro copy — exists only after React 
 Check any site with:
 
 ```bash
-curl -s https://drewhoover.com/<slug>/ | grep -c '<div id="root"></div>'
+curl -s https://<domain>/<slug>/ | grep -c '<div id="root"></div>'
 ```
 
 `1` means the page is empty to a crawler.
@@ -82,21 +82,21 @@ These pages don't outrank Wikipedia, Billboard or an official site on the obviou
 - ✗ `The 29 Max Martin Hits Behind & Juliet` — competes on "& Juliet songs", which is lost before it starts.
 - ✓ `& Juliet Songs in Release Order: All 29 Max Martin Originals` — release order and dates are the page's actual differentiator.
 
-Keep the title under ~60 characters and the description under ~155. Search what people type before writing either, and check `site:drewhoover.com <slug>` to see whether the page is indexed at all.
+Keep the title under ~60 characters and the description under ~155. Search what people type before writing either, and check `site:<domain> <slug>` to see whether the page is indexed at all.
 
 ## Canonical, JSON-LD, sitemap
 
 Canonical in `index.html`:
 
 ```html
-<link rel="canonical" href="https://drewhoover.com/<slug>/" />
+<link rel="canonical" href="https://<domain>/<slug>/" />
 ```
 
 JSON-LD: generate it in the prerender step from the same data the page renders, so it can't drift from what's on screen. `ItemList` of the rows, plus `WebPage` and `BreadcrumbList`, in one `@graph`. Only describe what's actually visible — structured data that doesn't match the page is a penalty, not a boost.
 
 Sitemap and robots live in the **index repo**, not the project:
 
-- `DrewHoo.github.io/public/robots.txt` carries `Sitemap: https://drewhoover.com/sitemap-index.xml`.
+- `<owner>.github.io/public/robots.txt` carries `Sitemap: https://<domain>/sitemap-index.xml`.
 - `@astrojs/sitemap` emits `sitemap-index.xml` + `sitemap-0.xml`. **There is no `/sitemap.xml`** — probing that path and concluding the sitemap is missing is an easy wrong turn.
 - The project sites are separate deployments, so Astro never sees them. `astro.config.mjs` harvests `liveUrl` from the project cards and passes them as `sitemap({ customPages })`. Without that, `/projects/<slug>/` (the card detail page) is listed while the actual site is in no sitemap anywhere.
 

@@ -1,17 +1,17 @@
-# Register a project on the drewhoover.com index
+# Register a project on the index site
 
-Read this when a sibling site is live and ready to appear on `https://drewhoover.com/` — i.e. it should show up as a card on the homepage and at `/projects/<slug>/`. This touches a different repo (`DrewHoo/DrewHoo.github.io`), so it's usually done as a follow-up commit after the project itself ships.
+Read this when a sibling site is live and ready to appear on `https://<domain>/` — i.e. it should show up as a card on the homepage and at `/projects/<slug>/`. This touches a different repo (`<owner>/<owner>.github.io`), so it's usually done as a follow-up commit after the project itself ships.
 
 ## Add the project card
 
-In `~/Projects/DrewHoo.github.io/`, create `src/content/projects/<slug>.md`:
+In `<index_repo_path>/`, create `src/content/projects/<slug>.md`:
 
 ```markdown
 ---
 title: My New Thing
 blurb: "Description shown on the homepage card. Max 500 chars; *single asterisks* render as <em>."
-liveUrl: https://drewhoover.com/<slug>/
-repoUrl: https://github.com/DrewHoo/<slug>
+liveUrl: https://<domain>/<slug>/
+repoUrl: https://github.com/<owner>/<slug>
 tags:
   - data viz          # must be in PROJECT_TAGS (src/consts.ts) — schema rejects anything else
 stack:
@@ -49,7 +49,7 @@ Both are root-level concerns, so they belong to this repo, not the project repos
   User-agent: *
   Allow: /
 
-  Sitemap: https://drewhoover.com/sitemap-index.xml
+  Sitemap: https://<domain>/sitemap-index.xml
   ```
 
 - **The project sites are not in the sitemap by default.** They're separate Pages deployments, so Astro builds `/projects/<slug>/` (the card detail page) but never the actual app. `astro.config.mjs` harvests `liveUrl` from the project cards and passes them through:
@@ -58,7 +58,7 @@ Both are root-level concerns, so they belong to this repo, not the project repos
   sitemap({ customPages: siblingSites })
   ```
 
-  A sitemap may only list URLs on its own host, so any card still pointing at `drewhoo.github.io/<slug>/` gets normalised to `drewhoover.com/<slug>/` first. Verify each URL returns 200 before including it — a sitemap full of 404s is worse than a short one.
+  A sitemap may only list URLs on its own host, so any card still pointing at `<owner>.github.io/<slug>/` gets normalised to `<domain>/<slug>/` first. Verify each URL returns 200 before including it — a sitemap full of 404s is worse than a short one.
 
 ## Analytics is not inherited either
 

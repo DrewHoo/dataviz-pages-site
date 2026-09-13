@@ -1,11 +1,11 @@
 # Scaffold a new sibling site
 
-Read this when setting up a brand-new repo under `DrewHoo/<slug>` and getting it serving at `drewhoover.com/<slug>/`. Walks the path from `gh repo create` to the first green Pages deploy.
+Read this when setting up a brand-new repo under `<owner>/<slug>` and getting it serving at `<domain>/<slug>/`. Walks the path from `gh repo create` to the first green Pages deploy.
 
 ## 1. Create the repo
 
 ```bash
-gh repo create DrewHoo/<slug> --public --clone
+gh repo create <owner>/<slug> --public --clone
 cd <slug>
 ```
 
@@ -103,8 +103,8 @@ Same template for `@rollup/rollup-linux-x64-gnu`, `@swc/core-linux-x64-gnu`, etc
 ## 5. Enable Pages + set source to Actions
 
 ```bash
-gh api -X POST repos/DrewHoo/<slug>/pages -f build_type=workflow 2>&1 || \
-  gh api -X PUT  repos/DrewHoo/<slug>/pages -f build_type=workflow
+gh api -X POST repos/<owner>/<slug>/pages -f build_type=workflow 2>&1 || \
+  gh api -X PUT  repos/<owner>/<slug>/pages -f build_type=workflow
 ```
 
 (Pages has to be created the first time with `POST`; existing Pages config uses `PUT`. The OR handles either case.)
@@ -115,10 +115,10 @@ Or in the UI: **Settings → Pages → Build and deployment → Source: GitHub A
 
 ```bash
 git push origin main
-gh run watch --repo DrewHoo/<slug>
+gh run watch --repo <owner>/<slug>
 # After green:
-curl -sI --resolve drewhoover.com:443:185.199.108.153 https://drewhoover.com/<slug>/ | head -5
+curl -sI --resolve <domain>:443:185.199.108.153 https://<domain>/<slug>/ | head -5
 # Expect HTTP/2 200, server: GitHub.com
 ```
 
-Once the site responds 200, move on to `references/meta-and-assets.md` for the head/favicon/OG pass, and `references/index-registration.md` to add it to drewhoover.com's project list.
+Once the site responds 200, move on to `references/meta-and-assets.md` for the head/favicon/OG pass, and `references/index-registration.md` to add it to the index site's project list.

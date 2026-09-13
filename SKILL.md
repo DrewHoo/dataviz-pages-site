@@ -1,23 +1,35 @@
 ---
 name: dataviz-pages-site
-description: Build, scaffold, or troubleshoot a sibling data-viz project that deploys to GitHub Pages under drewhoover.com/<repo-slug>/. Covers the whole stack — repo + Vite + base-path config, Actions-based deploy and scheduled data refreshes, build-time data fetching, agent-researched datasets with per-row citations, shareable URL state, mobile-first responsive design, SEO (prerendering the SPA so crawlers see content, headings, titles, JSON-LD, sitemap and robots), OG/Twitter meta tags + favicon + index-card image generation, Mixpanel analytics via the shared drewhoover.com embed, common date-handling traps, and registering or refreshing the project card on the drewhoover.com index. Use when the user says "new dataviz project", "set up a new site under drewhoover.com", "make a dataviz site", "why isn't my project serving", "make this site shareable", "add OG image to a dataviz site", "add analytics to a dataviz site", "I'm not getting any analytics/Mixpanel events", "fix SEO on a dataviz site", "my project isn't showing up in search", "update the project card on drewhoover.com", "fix mobile UX on a dataviz site", says the data "does not exist anywhere" or has to be researched/assembled from documents, or mentions the space-rock / cfb-all-time-records / buy-it-now-or-never / how-many-rings pattern.
+description: Build, scaffold, or troubleshoot a sibling data-viz project that deploys to GitHub Pages under your own domain at <domain>/<repo-slug>/. Covers the whole stack — repo + Vite + base-path config, Actions-based deploy and scheduled data refreshes, build-time data fetching, agent-researched datasets with per-row citations, shareable URL state, mobile-first responsive design, SEO (prerendering the SPA so crawlers see content, headings, titles, JSON-LD, sitemap and robots), OG/Twitter meta tags + favicon + index-card image generation, Mixpanel analytics via the index site's shared embed, common date-handling traps, and registering or refreshing the project card on the index site. Use when the user says "new dataviz project", "set up a new site under my domain", "make a dataviz site", "why isn't my project serving", "make this site shareable", "add OG image to a dataviz site", "add analytics to a dataviz site", "I'm not getting any analytics/Mixpanel events", "fix SEO on a dataviz site", "my project isn't showing up in search", "update the project card on the index site", "fix mobile UX on a dataviz site", says the data "does not exist anywhere" or has to be researched/assembled from documents, or mentions the space-rock / cfb-all-time-records / buy-it-now-or-never / how-many-rings pattern.
 ---
 
-# Building a GitHub Pages data-viz project site under drewhoover.com
+# Building a GitHub Pages data-viz project site under your own domain
 
-The index site lives at `DrewHoo/DrewHoo.github.io` and serves `https://drewhoover.com/`. Any other repo owned by `DrewHoo` with GitHub Pages enabled automatically appears at `https://drewhoover.com/<repo-name>/` — no DNS per project, no subdomain. This skill describes how to make a new sibling site, and how to diagnose a broken one.
+The index site lives at `<owner>/<owner>.github.io` and serves `https://<domain>/`. Any other repo owned by `<owner>` with GitHub Pages enabled automatically appears at `https://<domain>/<repo-name>/` — no DNS per project, no subdomain. This skill describes how to make a new sibling site, and how to diagnose a broken one.
+
+## Config
+
+Set these once for your setup. Every `<owner>`, `<domain>`, and `<index_repo_path>` in this skill and its references means these values. `<slug>` stays per-project.
+
+| key | value | meaning |
+| --- | --- | --- |
+| `owner` | `DrewHoo` | GitHub username. The index site repo is always `<owner>/<owner>.github.io`. |
+| `domain` | `drewhoover.com` | Custom domain on the index site. Project sites serve at `https://<domain>/<slug>/`. |
+| `index_repo_path` | `~/Projects/DrewHoo.github.io` | Local clone of the index repo, for registering project cards. |
+
+The Mixpanel token is not config here. It lives in the index repo's embed source (`src/scripts/embed-analytics.js`), and project sites only load the built embed. See `references/analytics.md`.
 
 Canonical examples in the wild:
 - `DrewHoo/space-rock` → https://drewhoover.com/space-rock/ (Vite + React + DuckDB-WASM)
 - `DrewHoo/cfb-all-time-records` → https://drewhoover.com/cfb-all-time-records/ (Vite + React, multi-page)
 - `DrewHoo/buy-it-now-or-never` → https://drewhoover.com/buy-it-now-or-never/ (Vite + React + D3, scheduled Yahoo fetch, URL-state, Mixpanel — the most complete reference)
-- `~/Projects/how-many-rings` (local) — the reference for a **researched** dataset: no source file existed, so an agent fleet assembled ~1,300 cited rows from media guides and archived staff directories. See `references/researched-datasets.md`.
+- `DrewHoo/how-many-rings` → https://drewhoover.com/how-many-rings/ — the reference for a **researched** dataset: no source file existed, so an agent fleet assembled ~1,300 cited rows from media guides and archived staff directories. See `references/researched-datasets.md`.
 
 When in doubt about a craft-level concern (analytics, OG image, URL state, mobile, etc.), copy the pattern from `buy-it-now-or-never`.
 
 ## The rules the routing depends on
 
-1. **Repo name = URL path.** `DrewHoo/my-thing` serves at `drewhoover.com/my-thing/`. Pick the slug you want in the URL.
+1. **Repo name = URL path.** `<owner>/my-thing` serves at `<domain>/my-thing/`. Pick the slug you want in the URL.
 2. **Must be public** (or a Pro org with Pages). User Site routing only fans out to public repos under the same owner.
 3. **Build output must match the base path.** See `references/scaffold.md` (step 3) — getting this wrong is the #1 reason a new site ships broken asset URLs.
 
@@ -26,8 +38,8 @@ When in doubt about a craft-level concern (analytics, OG image, URL state, mobil
 Each file under `references/` covers one concern in depth. Read the ones relevant to the current task; don't preload them all.
 
 - **`references/scaffold.md`** — Read when setting up a new repo. Covers `gh repo create`, Vite + `base` path, the deploy workflow YAML (with the lightningcss/sharp Linux CI gotcha), enabling Pages via API, push + verify.
-- **`references/meta-and-assets.md`** — Read when polishing a site for sharing. Full `<head>` template (title, description, OG, Twitter, favicons, drewhoover.com chrome) plus `sharp`-based favicon and OG image generation scripts.
-- **`references/index-registration.md`** — Read when a site is live and needs a project card on `drewhoover.com`. Touches a different repo (`DrewHoo.github.io`).
+- **`references/meta-and-assets.md`** — Read when polishing a site for sharing. Full `<head>` template (title, description, OG, Twitter, favicons, index-site chrome) plus `sharp`-based favicon and OG image generation scripts.
+- **`references/index-registration.md`** — Read when a site is live and needs a project card on `<domain>`. Touches a different repo (`<owner>.github.io`).
 - **`references/build-time-data.md`** — Read when the site has time-varying JSON content (prices, sports stats, scraped data). Covers the fetch-and-bake-at-build-time pattern, bounded concurrency, scheduled refresh cron tuning, and why `public/data/` is gitignored.
 - **`references/researched-datasets.md`** — Read when the data does **not** exist as a file or API anywhere and has to be assembled by an agent fleet from documents. Covers inverting the question so a deterministic join does the counting, per-row verbatim citations as a hallucination gate, encoding judgment as versioned rule files, the coverage report that catches the failure modes a finished page hides, and how to prompt sweeps so they reject as well as confirm.
 - **`references/url-state.md`** — Read when adding shareable views. URL ↔ state mirroring with `replaceState`, validation against loaded data, user-action vs URL-load preservation, and the paired "Share this chart" button.
@@ -39,22 +51,22 @@ Each file under `references/` covers one concern in depth. Read the ones relevan
 
 For a brand-new site, walk these steps in order. Each step is a one-liner here; the deep reference is in `references/scaffold.md` unless noted.
 
-1. `gh repo create DrewHoo/<slug> --public --clone && cd <slug>`
+1. `gh repo create <owner>/<slug> --public --clone && cd <slug>`
 2. `npm create vite@latest . -- --template react && npm install`
 3. **Set `base: '/<slug>/'` in `vite.config.js`.** Skipping this ships a blank page with 404s on every asset.
 4. Add `.github/workflows/deploy.yml` (Actions → Pages). If using `lightningcss` / `sharp` / Tailwind v4, add the Linux binary fix between `npm ci` and `npm run build`.
-5. Enable Pages: `gh api -X POST repos/DrewHoo/<slug>/pages -f build_type=workflow` (fall back to `PUT` if it already exists).
-6. Fill out `index.html` from the template in `references/meta-and-assets.md` (drewhoover.com back-bar + giscus chrome go in `<head>`).
+5. Enable Pages: `gh api -X POST repos/<owner>/<slug>/pages -f build_type=workflow` (fall back to `PUT` if it already exists).
+6. Fill out `index.html` from the template in `references/meta-and-assets.md` (the index site's back-bar + giscus chrome go in `<head>`).
 7. Generate favicon set + OG image via `sharp` scripts, plus the 8:5 index-card cover. See `references/meta-and-assets.md`.
 8. Add the prerender build step so the deployed HTML actually contains the page. See `references/seo.md`.
-9. Register the project on the drewhoover.com index. See `references/index-registration.md`.
-10. `git push origin main && gh run watch --repo DrewHoo/<slug>`, then `curl -sI https://drewhoover.com/<slug>/` to confirm 200.
+9. Register the project on the index site. See `references/index-registration.md`.
+10. `git push origin main && gh run watch --repo <owner>/<slug>`, then `curl -sI https://<domain>/<slug>/` to confirm 200.
 
 Add the opt-in subsystems (build-time data, URL state, mobile interactions, analytics) as the project's needs justify — see the matching reference file. Analytics is close to non-optional: it is one script tag, and skipping it is why several shipped sites have no data at all.
 
 ## Style baseline
 
-The drewhoover.com sites have a shared visual feel but no design system. Hand-rolled CSS in `src/styles.css`, system font stack, neutral palette plus one or two accent colors that come from the project's content (e.g. buy-it-now-or-never's red/green semantic palette).
+The sibling sites have a shared visual feel but no design system. Hand-rolled CSS in `src/styles.css`, system font stack, neutral palette plus one or two accent colors that come from the project's content (e.g. buy-it-now-or-never's red/green semantic palette).
 
 A working baseline:
 
@@ -96,7 +108,7 @@ third of its rows missing looks exactly as confident as a complete one.
 
 Before sharing the URL anywhere:
 
-- [ ] Site loads at `https://drewhoover.com/<slug>/` (200, not 404)
+- [ ] Site loads at `https://<domain>/<slug>/` (200, not 404)
 - [ ] No console errors on load
 - [ ] **Content is in the HTML, not just in JS**: `curl -s <url> | grep -c '<div id="root"></div>'` returns `0`. A `1` means crawlers see an empty page — see `references/seo.md`
 - [ ] Exactly one `<h1>`, and it names the subject rather than a section
@@ -112,7 +124,7 @@ Before sharing the URL anywhere:
 - [ ] Favicon is visible in the tab strip (hard refresh if stale)
 - [ ] Back-bar appears at the top of the page
 - [ ] Comments section renders at the bottom (giscus widget loads)
-- [ ] Project card is registered on drewhoover.com index and links work — see `references/index-registration.md`
+- [ ] Project card is registered on the index site and links work — see `references/index-registration.md`
 - [ ] Card cover is 1200×750, and **open the PNG** — the card crops 8:5, so a 1200×630 OG image loses its top and bottom silently
 - [ ] Card blurb describes the site as it is now, not as it was before the last redesign
 - [ ] If the data was researched rather than downloaded: coverage report is clean, every displayed claim links to a source, and any weaker-evidence rows are labeled as such — see `references/researched-datasets.md`
@@ -124,17 +136,17 @@ Before sharing the URL anywhere:
 You forgot `base: '/<slug>/'` in `vite.config.js` — or the base string doesn't match the repo name exactly. Fix, rebuild, redeploy. See `references/scaffold.md` step 3.
 
 ### Back-bar / comments don't appear
-1. **Scripts present in the deployed HTML?** `curl -s --resolve drewhoover.com:443:185.199.108.153 https://drewhoover.com/<slug>/ | grep drewhoover.com/embed` — if empty, redeploy.
+1. **Scripts present in the deployed HTML?** `curl -s --resolve <domain>:443:185.199.108.153 https://<domain>/<slug>/ | grep <domain>/embed` — if empty, redeploy.
 2. **Old `gh-pages` branch deploy still active?** If `package.json` has a `deploy:pages` script that copies `dist → docs/`, the live site is the stale `docs/`. Migrate to the Actions workflow, remove `docs/`.
 3. **Client-side exception on load?** The embed scripts are `async` in `<head>`; an early app error keeps them from visibly mounting. Check the browser console.
 
 ### Deploy workflow runs green but the site didn't actually update
 ```bash
-gh api repos/DrewHoo/<slug>/pages --jq '{source, build_type}'
+gh api repos/<owner>/<slug>/pages --jq '{source, build_type}'
 ```
 If `build_type: "legacy"`, Pages is still serving from a branch. Fix:
 ```bash
-gh api -X PUT repos/DrewHoo/<slug>/pages -f build_type=workflow
+gh api -X PUT repos/<owner>/<slug>/pages -f build_type=workflow
 ```
 Then re-run the workflow.
 
@@ -158,9 +170,9 @@ UI caches the last health-check. Hard refresh the page; if persistent, remove an
 
 ## What not to bother with
 
-- Per-repo custom domain — each project inherits `drewhoover.com/<slug>/` for free.
+- Per-repo custom domain — each project inherits `<domain>/<slug>/` for free.
 - Per-repo `CNAME` file — only the index repo needs one.
-- Installing giscus app on every project repo — the embed points all traffic at the central Discussions instance on `DrewHoo.github.io`.
+- Installing giscus app on every project repo — the embed points all traffic at the central Discussions instance on `<owner>.github.io`.
 - Building a full design system — the sibling sites share a feel through convention, not a shared CSS package.
 - Adding consent / cookie banners for Mixpanel — the token is anonymous-by-default, no PII; the sibling sites do not currently require consent in any jurisdiction we operate in.
 - Per-project favicon CDN — favicons are static files in `public/`.
