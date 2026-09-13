@@ -51,16 +51,15 @@ Each file under `references/` covers one concern in depth. Read the ones relevan
 
 For a brand-new site, walk these steps in order. Each step is a one-liner here; the deep reference is in `references/scaffold.md` unless noted.
 
-1. `gh repo create <owner>/<slug> --public --clone && cd <slug>`
-2. `npm create vite@latest . -- --template react && npm install`
-3. **Set `base: '/<slug>/'` in `vite.config.js`.** Skipping this ships a blank page with 404s on every asset.
-4. Add `.github/workflows/deploy.yml` (Actions → Pages). If using `lightningcss` / `sharp` / Tailwind v4, add the Linux binary fix between `npm ci` and `npm run build`.
+1. `gh repo create <owner>/<slug> --public --clone --template DrewHoo/dataviz-project-template && cd <slug>`. The template ships Vite + React, the deploy workflow, the prerender step, the `<head>` generator, the favicon and OG scripts, and a sample D3 chart with URL state. `references/scaffold.md` explains what each piece does if you need to build one by hand.
+2. Set `"name"` in `package.json` to `<slug>`. `vite.config.js` derives the `base` path from it, and a wrong name ships a blank page with 404s on every asset.
+3. Edit `site.config.js`: `<domain>`, title, description, OG copy, accent color.
+4. `npm install && npm run gen:favicon && npm run gen:og`. Open `public/og.png` and `public/card.png` and look at them. Commit the outputs.
 5. Enable Pages: `gh api -X POST repos/<owner>/<slug>/pages -f build_type=workflow` (fall back to `PUT` if it already exists).
-6. Fill out `index.html` from the template in `references/meta-and-assets.md` (the index site's back-bar + giscus chrome go in `<head>`).
-7. Generate favicon set + OG image via `sharp` scripts, plus the 8:5 index-card cover. See `references/meta-and-assets.md`.
-8. Add the prerender build step so the deployed HTML actually contains the page. See `references/seo.md`.
-9. Register the project on the index site. See `references/index-registration.md`.
-10. `git push origin main && gh run watch --repo <owner>/<slug>`, then `curl -sI https://<domain>/<slug>/` to confirm 200.
+6. If using `lightningcss` / `sharp` in the build / Tailwind v4, uncomment the Linux binary line in `.github/workflows/deploy.yml`.
+7. Replace the sample: `src/data/sample.js`, `src/App.jsx`, `src/Chart.jsx`, `src/styles.css`. Keep `hydrateRoot`, keep `window` reads out of render, keep pointer events.
+8. Register the project on the index site. See `references/index-registration.md`.
+9. `git push origin main && gh run watch --repo <owner>/<slug>`, then `curl -sI https://<domain>/<slug>/` to confirm 200.
 
 Add the opt-in subsystems (build-time data, URL state, mobile interactions, analytics) as the project's needs justify — see the matching reference file. Analytics is close to non-optional: it is one script tag, and skipping it is why several shipped sites have no data at all.
 

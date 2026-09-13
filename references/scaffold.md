@@ -2,6 +2,8 @@
 
 Read this when setting up a brand-new repo under `<owner>/<slug>` and getting it serving at `<domain>/<slug>/`. Walks the path from `gh repo create` to the first green Pages deploy.
 
+**The short path:** `gh repo create <owner>/<slug> --public --clone --template DrewHoo/dataviz-project-template` does steps 2 through 4 below. Then set `"name"` in `package.json` to the slug, fill in `site.config.js`, and skip to step 5. The rest of this file is what the template contains and why, for a project that starts from another stack.
+
 ## 1. Create the repo
 
 ```bash
