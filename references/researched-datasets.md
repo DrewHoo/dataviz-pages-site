@@ -113,3 +113,30 @@ reads as broken. Two things worth knowing:
   for departed staff, hall-of-fame pages, and obituaries.
 - Keep a manifest with source, license and caveat per image, and support a
   `locked` flag so a hand-picked photo survives every re-run.
+
+## Verifying computed rows against an independent source
+
+Learned on `hostile-territory` (1,851 games verified against archived
+Sports-Reference pages). When rows are COMPUTED from bulk data rather than
+researched, the fleet's job flips: not gathering, but checking every displayed
+row against a source the pipeline never touched. What made it work:
+
+- **Corrections are a versioned layer, not edits.** `data/game-corrections.json`
+  holds evidence-backed `exclude`/`patch` entries applied before the join, each
+  citing its receipt. The bulk data stays as fetched; provenance survives.
+  The fleet found 29 exclusions and 9 patches the bulk source had wrong.
+- **A discrepancy is a fork, not a fix.** Some fleet flags were the source
+  being wrong, not us — adjudicate with a third source before "correcting,"
+  and record resolved disputes in a triage file so the coverage report can
+  tell triaged from untriaged. Five of five rank disputes resolved AGAINST
+  the verification source.
+- **Group fetches by the concentrated side of the join.** Verifying visitors
+  via host-season pages cut the page count by 60% — ranked hosts repeat.
+- **One slice mutation-tested its own checks** (perturb each worklist field,
+  confirm everything flips to discrepancy) before reporting zero
+  discrepancies. Ask for that when a slice comes back suspiciously clean.
+- **A known-answer check is the cheapest coverage gate.** The whole project
+  existed because of one broadcast factoid; the report fails unless the
+  pipeline reproduces it. It caught missing tenure files twice.
+- Sibling agents sharing a scratchpad WILL overwrite each other's helper
+  scripts — tell every fleet member to namespace under its own subdirectory.

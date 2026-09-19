@@ -20,6 +20,7 @@ Set these once for your setup. Every `<owner>`, `<domain>`, and `<index_repo_pat
 The Mixpanel token is not config here. It lives in the index repo's embed source (`src/scripts/embed-analytics.js`), and project sites only load the built embed. See `references/analytics.md`.
 
 Canonical examples in the wild:
+- `DrewHoo/hostile-territory` → https://drewhoover.com/hostile-territory/ — the reference for a **computed-and-verified** dataset (bulk sources joined against researched tenures, every displayed claim receipt-checked against an independent source) and for the current dense/quiet visual direction.
 - `DrewHoo/space-rock` → https://drewhoover.com/space-rock/ (Vite + React + DuckDB-WASM)
 - `DrewHoo/cfb-all-time-records` → https://drewhoover.com/cfb-all-time-records/ (Vite + React, multi-page)
 - `DrewHoo/buy-it-now-or-never` → https://drewhoover.com/buy-it-now-or-never/ (Vite + React + D3, scheduled Yahoo fetch, URL-state, Mixpanel — the most complete reference)
@@ -45,6 +46,7 @@ Each file under `references/` covers one concern in depth. Read the ones relevan
 - **`references/url-state.md`** — Read when adding shareable views. URL ↔ state mirroring with `replaceState`, validation against loaded data, user-action vs URL-load preservation, and the paired "Share this chart" button.
 - **`references/mobile-and-dates.md`** — Read when interactions break on touch devices or dates display one day off for US viewers. Covers `pointer*` events, `touch-action: pan-y`, responsive table hiding, and the UTC midnight pitfall (`scaleUtc` + `utcFormat`).
 - **`references/analytics.md`** — Read when adding Mixpanel, **or when a site is reporting nothing**. Project sites do not inherit the index site's analytics; several shipped without any and reported zero for months. Covers the shared `/embed/analytics.js` drop-in, the per-repo alternative, and how to verify delivery instead of assuming it.
+- **`references/cfb-sources.md`** — Read for any college-football project: which bulk sources curl cleanly, cfbfastR's specific lies (UTC dates, 2001-2007 neutral flags), the no-key ESPN adjudicator APIs, Sports-Reference via the Wayback Machine, and the one-color logo pipeline.
 - **`references/seo.md`** — Read before announcing a site, or when it isn't showing up in search. Prerendering the SPA (the big one — without it the deployed HTML contains no content at all), a real `<h1>`, titles aimed at winnable queries, JSON-LD, canonical, sitemap and robots.
 
 ## Scaffold workflow (high-level)
@@ -92,6 +94,38 @@ main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
 ```
 
 Card-style sections (white background, 1px border, 8px radius, light shadow) read well against the off-white page background and don't compete with the data. Use real semantic colors (red for danger, green for success, etc.) for data elements, not for chrome.
+
+### The denser direction (hostile-territory, 2026-09)
+
+Drew's standing preference moved toward **less text, less color, less chrome**
+— the data is the page. What that meant concretely, and what to reach for
+first on the next project:
+
+- Strike framing prose on sight. Drew cut the hero stat, the origin-story
+  paragraph, a decorative header label, and a self-narrating interaction
+  caption from an already-short page. One italic sentence of setup, then the
+  board.
+- Identity through assets, not labels: entity marks (team logos as one-color
+  stamps) replaced both the per-game W/L letters and the spelled-out school
+  names next to coaches. Outcome rides on LIGHTNESS (lit cream chip vs
+  recessive charcoal), not hue — colorblind-safe by construction, and the
+  page stays duotone-plus-one-accent.
+- Records as `3–7 .300` baseball averages on one line, not "30% won" on two.
+- Poster-dense layout: two columns flowing down-then-across, 18px marks, 6px
+  row padding. This started as a static PNG export Drew loved so much the
+  site was rebuilt to match it — make the dense export early; it's a design
+  probe, not just a share asset.
+- A `scripts/gen-poster.mjs`-style dense PNG export earns its keep three
+  ways: Reddit share asset, the `og:image` (keep `twitter:image` on the 2:1
+  card — X force-crops), and the design target itself. Bake the site URL and
+  date into its footer so attribution survives rehosting.
+- Interactions follow the same restraint: a popover carries score/coaches/OT
+  detail so the board itself never grows labels; hovering a game highlights
+  the same host's other games with a ring, silently.
+- Mockups-first still works: three themed looks as static HTML, screenshot,
+  let Drew pick, then iterate the one encoding he flags. Validate data colors
+  with the dataviz skill's palette validator against the chosen surface
+  before showing anything.
 
 ## When the data has to be researched
 
