@@ -11,6 +11,7 @@ In `<index_repo_path>/`, create `src/content/projects/<slug>.md`:
 title: My New Thing
 blurb: "Description shown on the homepage card. Max 500 chars; *single asterisks* render as <em>."
 liveUrl: https://<domain>/<slug>/
+sitemapUrl: https://<domain>/<slug>/sitemap.xml   # only if the site writes its own sitemap (see below)
 repoUrl: https://github.com/<owner>/<slug>
 tags:
   - data viz          # must be in PROJECT_TAGS (src/consts.ts) — schema rejects anything else
@@ -59,6 +60,8 @@ Both are root-level concerns, so they belong to this repo, not the project repos
   ```
 
   A sitemap may only list URLs on its own host, so any card still pointing at `<owner>.github.io/<slug>/` gets normalised to `<domain>/<slug>/` first. Verify each URL returns 200 before including it — a sitemap full of 404s is worse than a short one.
+
+- **A sibling site with its own sitemap sets `sitemapUrl` on its card.** `liveUrl` only gets the site's root into `sitemap-0.xml`; a prerendered site with hundreds of pages (per-team, per-game) writes its own `sitemap.xml`, and nothing registered with Search Console pointed at it. The index's postbuild step (`scripts/sitemap-index.mjs`, run by `npm run build` after `astro build`) reads `sitemapUrl` off every card and adds a `<sitemap>` entry for it to `sitemap-index.xml`, the one sitemap registered in Search Console and Bing. Set it only when `<liveUrl>sitemap.xml` returns 200 with a `<urlset`; no need to resubmit anything, the index is already registered.
 
 ## Analytics is not inherited either
 
