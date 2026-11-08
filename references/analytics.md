@@ -25,6 +25,7 @@ What it does:
 - Auto-pageview on load **and** on every history change, so `replaceState` URL state (see `references/url-state.md`) counts each view.
 - Registers a `site` super-property (first path segment, `index` at the root) so reports split project sites apart without pathname parsing.
 - Same origin as the index site, so `distinct_id` carries over — a visit that starts on the homepage and continues into a project reads as one person.
+- Sends `leave` as the tab hides: `seconds` in view, `scroll` (deepest, 0–100 in fives), `taps`, `views` (pageviews this load), `landing`, `page` and a `load` id. A tab that hides twice sends running totals twice, so read the last per `load`. Same event and fields as puttingupnumbers.com's, so a one-page visit reads as a read or a bounce on every site.
 - Exposes `window.dhAnalytics.track(name, props)`, queued until init, dropped silently if blocked.
 - Opt out with `data-dhv-analytics="off"` on `<html>` or `<body>`.
 
