@@ -102,5 +102,5 @@ performance.getEntriesByType('resource')
 
 Two traps when checking a change to the embed:
 
-- **`cache-control: max-age=600`.** After redeploying `embed/analytics.js` the browser serves the old copy for ten minutes — including its old errors. Force a fresh fetch with `'?cb=' + Date.now()` (and `delete window.dhAnalytics` first, or the double-init guard bails).
+- **`cache-control: max-age=14400`** (Cloudflare's, since drewhoover.com's DNS moved there; it was GitHub Pages' 600). After redeploying `embed/analytics.js` a browser that already has it serves the old copy for up to four hours — including its old errors. Force a fresh fetch with `'?cb=' + Date.now()` (and `delete window.dhAnalytics` first, or the double-init guard bails).
 - **Mixpanel batches.** Nothing hits the network for ~5s after a `track()`. An immediate check always shows zero.
