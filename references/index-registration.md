@@ -30,6 +30,19 @@ updated: YYYY-MM-DD
 Optional MDX body renders at /projects/<slug>/.
 ```
 
+### A sports site
+
+A sports site is listed on `https://<domain>/sports/` as a row, not on `/projects` as a card, and it has no detail page. Add these fields and leave `sports` out of `tags` (it is not a tag):
+
+```yaml
+section: sports
+league: CFB            # CFB, NFL, WNBA, NCAA; picks the one-color mark on the row (new league: add a mark under public/sports/logos/ and a line in src/lib/sports.ts)
+span: 1936–present     # seasons covered; in the manifest only, not on the row
+line: "One sentence for the row, in the site's own words. The blurb stays for the manifest."
+```
+
+The index build writes `/sports/index.json`, the sports manifest, from these entries. The sports sites read it for their "more sports from drewhoover.com" list: a site from the template fetches it in `scripts/prerender.mjs` at build time, an older site includes `https://<domain>/embed/sports-nav.js`. Registering the card is what puts a new site in every sibling's list on their next build, so do it before announcing. A sports site also passes `data-section="sports"` on its back-bar script tag (the template's prerender does this from `site.config.js`) so the bar reads "← drewhoover.com/sports".
+
 The real schema is `src/content.config.ts`; check it rather than trusting this snippet, since it's the thing that will reject the build. `tags` is a closed enum — `music` is not a tag.
 
 Commit just that file (be careful — the index repo may have unrelated in-progress edits to other cards; do not include them). Push. The index rebuilds via its own Actions workflow.
